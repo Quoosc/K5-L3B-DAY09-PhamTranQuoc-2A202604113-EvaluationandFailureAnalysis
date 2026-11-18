@@ -54,6 +54,8 @@ def integrity_check(pr: dict, base: dict, spec: dict, base_spec: dict | None = N
     for i, row in enumerate(rows):
         for mid in graded:
             if row.get(mid) is None: problems.append(f"row {i} missing graded metric {mid}")
+            elif not isinstance(row[mid], (bool, int, float)) or not math.isfinite(row[mid]):
+                problems.append(f"row {i} invalid graded metric {mid}")
     base_slices = {r.get("item_id"): tuple(sorted(r.get("slices") or [])) for r in base.get("rows", [])}
     for row in rows:
         if tuple(sorted(row.get("slices") or [])) != base_slices.get(row.get("item_id")):

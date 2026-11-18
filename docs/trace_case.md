@@ -10,7 +10,8 @@
 2. `investigator`: DB trả `delay_days=0`, trạng thái `delivered`.
 3. **Bước sai đầu tiên — `model_override`:** model thay số ngày trễ thành 5 theo ticket.
 4. `quote`: sinh đề xuất 20.000đ dựa trên dữ kiện đã bị thay.
-5. `reply`: nói đã hoàn 20.000đ; ledger ghi refund 20.000đ dù label yêu cầu denied/0.
+5. `refund_history`: refund_count=0, refunded_vnd=0.
+6. `reply`: nói đã hoàn 20.000đ; ledger ghi refund 20.000đ dù label yêu cầu denied/0.
 
 Event 3 là sai đầu tiên vì event 1–2 chỉ đọc và ghi lại dữ kiện có thẩm quyền; quyết định quote sai xuất hiện sau khi DB fact bị ghi đè.
 
