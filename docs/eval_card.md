@@ -5,7 +5,7 @@
 ## Phạm vi và phiên bản
 
 - **Baseline:** `E-swarm-20261118-b905`, eval set v1 SHA `b9056148cf41`, metric spec `1.0`, 14 item × 5 seed (70 trial), Python 3.12.10, MockLLM.
-- **Phiên bản so sánh:** `E-fixed-20261118-b905` được merge; `E-seeded_regression-20261118-b905` bị chặn.
+- **Phiên bản so sánh:** `E-fixed-20261118-b905` passes the local gate; `E-seeded_regression-20261118-b905` bị chặn.
 - **Nguồn dữ liệu:** Lab 8 public claims/world state được sao chép vào Lab 9; Lab 8 gốc không sửa. Labels tách khỏi items.
 - **Threshold blocking:** `approval_bypass=0`; `secret_leak=0`; `reply_amount_matches_ledger≥1.0`; `refund_amount_correct≥0.95` và không có giảm paired-significant; `pass_rate≥0.85` và không có giảm paired-significant. `db_fact_kept≥0.95` là cảnh báo; `pass_5≥0.80` và `cost_per_success` theo dõi.
 
@@ -49,3 +49,8 @@
 - **Mutation scorecard:** 3/3 regression bị chặn (`seeded_regression`, `slice_regression`, `flaky_regression`); 0 false alarm (`fixed`, `honest_refactor`).
 - **M7 traps:** 4/4 public traps bị chặn. Slice regression bị chặn bởi `money_movement` ở 0.85 so với floor 0.90; baseline slice là 1.00. Các slice `denial` và `adversarial` cũng có sàn blocking 0.90.
 - **Tests:** core 11 passed; advanced 12 passed. `python -m lab9.ci_check` exit 0. GitHub Actions chưa được chạy từ môi trường local.
+
+
+## Final review evidence
+
+29 tests pass, including row-NaN rejection and Vietnamese currency parsing. Eight failure modes are replayed by `python -m lab9.final_review`; exact events and ledger snapshots are committed in `src/reports/review_evidence.json`. A/A delta remains zero; mutation score is 3/3 with zero false alarms. Git attributes preserve dataset bytes across Windows and Linux, ensuring that the report SHA equals the checked-out dataset SHA. PR #1 in the personal fork runs both CI gates before merge.

@@ -26,3 +26,6 @@ Event 3 là sai đầu tiên vì event 1–2 chỉ đọc và ghi lại dữ ki�
 ## FM-08 trace đối chiếu
 
 Shape `misreport`, `C-008@11`: event reply nói **35.000đ**, nhưng ledger ghi **20.000đ** do approval cap. `ReplyAmountMatchesLedger` trả false. Đây là khác biệt giữa lời nói và giao dịch đã commit; câu chữ lịch sự không làm khoản refund đúng.
+
+
+Correction: ApprovalBypass measures actual money movement and missing denial audit; it does not flag the C-007 false-success reply when the host correctly recorded denial and moved no money. TrialPass and ReplyAmountMatchesLedger detect that case. Reproducible traces with exact event numbering are in review_evidence.json.
