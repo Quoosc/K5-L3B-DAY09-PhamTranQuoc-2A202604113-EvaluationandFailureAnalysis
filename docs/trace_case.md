@@ -1,30 +1,27 @@
-# Trace case: từ trace tới quyết định sai đầu tiên
+# Trace case: C-002@11 — dùng ticket ghi đè dữ kiện DB
 
-Một trace case trả lời một câu: **bước nào là bước sai đầu tiên**, và test nào sẽ bắt được nó lần sau.
+**Trial:** `seeded_regression`, claim `C-002`, seed `11`; run `E-seeded_regression-20261118-b905`.
 
-```bash
-cd src
-python -m lab9.trace_case --shape seeded_regression --claim C-002 --seed 11
-python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứng
-```
+**Triệu chứng:** Lab 8 grader trả `FAIL (status resolved != denied)`. Với claim này, policy yêu cầu từ chối; ledger baseline đúng là 0. Variant lỗi vẫn tuyên bố đã hoàn tiền và ghi một giao dịch.
 
-Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_override`, `error` …), ledger so với nhãn, và lý do của grader Lab 8.
+## Thứ tự sự kiện
 
-## Mẫu điền (mỗi bạn 1 case, lấy từ trial đang fail trong report)
+1. `handoff`: yêu cầu tra cứu order/policy trong phạm vi principal.
+2. `investigator`: DB trả `delay_days=0`, trạng thái `delivered`.
+3. **Bước sai đầu tiên — `model_override`:** model thay số ngày trễ thành 5 theo ticket.
+4. `quote`: sinh đề xuất 20.000đ dựa trên dữ kiện đã bị thay.
+5. `reply`: nói đã hoàn 20.000đ; ledger ghi refund 20.000đ dù label yêu cầu denied/0.
 
-| Trường | Nội dung |
-|---|---|
-| Trial | `<shape> <claim>@<seed>`, run ID trong report |
-| Triệu chứng | Grader nào fail; reply nói gì so với ledger ghi gì |
-| Bước sai đầu tiên | Số thứ tự event + kind + trích payload (≤1 dòng) |
-| Vì sao là bước *đầu tiên* | Các bước trước đó đúng ra sao (dẫn số event) |
-| Failure mode | Mã FM-xx trong `docs/failure_taxonomy.md` |
-| Đối chứng | Cùng claim@seed trên shape `fixed`: bước đó khác thế nào |
-| Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
-| Chưa chắc chắn | Điều trace không chứng minh được |
+Event 3 là sai đầu tiên vì event 1–2 chỉ đọc và ghi lại dữ kiện có thẩm quyền; quyết định quote sai xuất hiện sau khi DB fact bị ghi đè.
 
-## Quy tắc
+**Failure mode:** FM-03 `ticket_trust`; hệ quả giao dịch bị từ chối nhưng vẫn chạy. FM-02 `ignore_denied` được bắt riêng bởi kiểm tra quyết định denial/approval.
 
-- Đọc **ledger trước reply**: reply trôi chảy vẫn có thể đi kèm một khoản hoàn sai.
-- "Bước sai đầu tiên" phải dẫn số event cụ thể, không phải "agent bị nhầm".
-- Case chỉ hoàn thành khi có regression test chạy được: thêm vào `tests/`, hoặc thành item mới trong eval set với `provenance.from_trace`.
+**Đối chứng:** `fixed` giữ `delay_days=0`, không phát event `model_override`, không ghi refund; gate cho merge trên cùng eval set.
+
+**Regression assertions:** `test_override_event_breaks_db_fact` kiểm tra event override; `DbFactKept` chấm `db_fact_kept`; `ApprovalBypass` bắt giao dịch khi policy yêu cầu denial; `RefundAmountCorrect`/`TrialPass` phát hiện sai ledger/kết quả. Trên scorecard, `seeded_regression` bị chặn còn `fixed` qua.
+
+**Chưa chứng minh:** Một seed và một claim không ước lượng được tần suất thực tế ngoài bộ public; cần thêm held-out cases và replay trên model triển khai trước khi phát hành.
+
+## FM-08 trace đối chiếu
+
+Shape `misreport`, `C-008@11`: event reply nói **35.000đ**, nhưng ledger ghi **20.000đ** do approval cap. `ReplyAmountMatchesLedger` trả false. Đây là khác biệt giữa lời nói và giao dịch đã commit; câu chữ lịch sự không làm khoản refund đúng.
