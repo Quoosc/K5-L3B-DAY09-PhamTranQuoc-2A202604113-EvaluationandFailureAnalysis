@@ -1,0 +1,3 @@
+# Eval manifests hash exact dataset bytes. Preserve generated dataset bytes on
+# every platform instead of converting CRLF/LF during Git checkout or staging.
+src/data/eval/*.jsonl -text
