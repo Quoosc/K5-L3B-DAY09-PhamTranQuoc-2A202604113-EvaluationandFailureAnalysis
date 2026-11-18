@@ -33,7 +33,7 @@
 ## Regression evidence và trách nhiệm
 
 - [Trace case C-002@11](trace_case.md): event `model_override` đầu tiên làm lệch dữ kiện DB; regression assert qua `DbFactKept`, approval, ledger và pass-rate graders.
-- FM-08 có grader code bắt buộc: mọi số VND trong event reply phải khớp refund đã commit trong ledger.
+- FM-08 có grader code bắt buộc: mỗi số tiền khẳng định đã hoàn trong reply phải khớp ledger. Tiền đề xuất/hạn mức có ngữ cảnh rõ được phân biệt riêng, kể cả khi hai số nằm trong cùng câu và phân cách bằng dấu phẩy. Hỗ trợ `đ`, `đồng`, `VND` và nhóm nghìn bằng dấu chấm, phẩy hoặc khoảng trắng.
 - Khi gate exit 1, gate owner điều tra trace và ledger, sửa nguyên nhân, chạy lại report; waiver chỉ được ghi nhận trong PR cùng lý do và người phê duyệt.
 
 ## Giới hạn và khi nào tạo v1.2
@@ -45,12 +45,18 @@
 ## Advanced / Expert evidence
 
 - **Baseline v2:** `E-swarm-20261118-e5c7`, SHA `e5c7fe7851c3`, 28 item × 5 seed. `pass_at_5=1.0`, `pass_hat_5=0.8929`, pass rate `0.9786`.
-- **A/A:** seeds `66,77,88,99,110`; mọi metric delta `0.0000`, gồm `pass_hat_5`. Floor được chọn là `0.85`, thấp hơn baseline `0.8929` và cao hơn các mức regression đã kiểm tra.
+- **A/A:** seeds `66,77,88,99,110`; mọi metric delta `0.0000`, gồm `pass_hat_5`. Floor `0.85` thấp hơn baseline `0.8929` với biên `0.0429`; dải nhiễu quan sát trên MockLLM là 0. Kết quả này không phải ước lượng nhiễu của LLM thật. Khi dùng model thật, cần lặp A/A trên nhiều bộ seed, đo CI của delta và phân phối `pass_hat_5`, rồi chọn sàn cách vùng dao động tự nhiên một biên đã được xác nhận. Nếu baseline/sàn nằm trong vùng nhiễu, tăng số item/seed hoặc đổi eval-set version trước khi hiệu chỉnh sàn; không nới ngưỡng để làm xanh regression.
 - **Mutation scorecard:** 3/3 regression bị chặn (`seeded_regression`, `slice_regression`, `flaky_regression`); 0 false alarm (`fixed`, `honest_refactor`).
 - **M7 traps:** 4/4 public traps bị chặn. Slice regression bị chặn bởi `money_movement` ở 0.85 so với floor 0.90; baseline slice là 1.00. Các slice `denial` và `adversarial` cũng có sàn blocking 0.90.
-- **Tests:** core 11 passed; advanced 12 passed. `python -m lab9.ci_check` exit 0. GitHub Actions chưa được chạy từ môi trường local.
+- **Tests:** toàn bộ 42 tests pass, gồm 13 vector mới cho dấu phân cách, thứ tự đề xuất/đã hoàn, tiền âm và định dạng tiền. Core/Advanced public tests vẫn pass. `python -m lab9.ci_check` exit 0. GitHub Actions của [PR #1](https://github.com/Quoosc/K5-L3B-DAY09-PhamTranQuoc-2A202604113-EvaluationandFailureAnalysis/pull/1) đã chạy, cả `eval-gate` và `eval-gate-v2` xanh trước merge; commit merge `90f81b5`. Các regression tests bổ sung được chạy trực tiếp trong workflow của PR cải thiện tiếp theo.
 
 
 ## Final review evidence
 
-29 tests pass, including row-NaN rejection and Vietnamese currency parsing. Eight failure modes are replayed by `python -m lab9.final_review`; exact events and ledger snapshots are committed in `src/reports/review_evidence.json`. A/A delta remains zero; mutation score is 3/3 with zero false alarms. Git attributes preserve dataset bytes across Windows and Linux, ensuring that the report SHA equals the checked-out dataset SHA. PR #1 in the personal fork runs both CI gates before merge.
+42 tests pass. `python -m lab9.final_review` tái tạo tám failure mode và đối chứng `fixed` của từng claim. [Bảng anchor](coding_sheet.md) dẫn tới CSV, event và ledger chính xác. [Output nộp bài](../src/reports/submission_evidence.md) được `python -m lab9.submission_check` sinh, ghi nguyên output scorecard, A/A và bốn gate exit 1. Git attributes giữ nguyên byte dataset giữa Windows/Linux để SHA khớp baseline.
+
+Với điều kiện lỗi xuất hiện khi `seed % 3 == 0` (khoảng 1/3 seed), bộ năm seed cố định có thể chỉ thấy một lần hoặc không thấy; không suy ra phát hiện ổn định trên LLM thật từ một lần replay. `pass_hat_5` nhạy với lỗi trong nhóm seed đã chạy, nhưng không chứng minh absence của lỗi hiếm. Cần tăng cỡ mẫu và dùng held-out incidents.
+
+Output đầy đủ cũng được đính vào mô tả [PR #2](https://github.com/Quoosc/K5-L3B-DAY09-PhamTranQuoc-2A202604113-EvaluationandFailureAnalysis/pull/2); tab Checks của PR là nguồn trạng thái CI của bản cải thiện. Hai gate phải xanh trước merge.
+
+LMS và hạn nộp theo ca: xem [trạng thái nộp bài](submission_status.md). Không dùng CI xanh để thay cho xác nhận đã nộp LMS hoặc kết quả chấm ẩn.

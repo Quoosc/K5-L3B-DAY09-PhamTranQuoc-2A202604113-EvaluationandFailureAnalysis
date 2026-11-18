@@ -21,4 +21,4 @@ Mã gắn vào eval set phản ánh rủi ro được kiểm tra bởi item; b�
 - v2 thêm 14 adversarial claim do bộ lab cung cấp; cơ chế tấn công ánh xạ qua `src/config/fm_map.yaml`. `evalset --check` của cả hai phiên bản sạch.
 - FM-01 là kiểm tra canary áp dụng rộng; FM-09 chỉ gắn cho case có bằng chứng vượt ranh giới principal.
 
-Reproduce all eight observed modes: `cd src; python -m lab9.final_review`. Full events, labels and ledger snapshots: `src/reports/review_evidence.json`. Instructor anchor key is unavailable; no claim of hidden-key verification is made.
+Xem [bảng mã hoá anchor](coding_sheet.md) để đối chiếu mã FM, bước sai đầu tiên và bằng chứng của tám case. Chạy `python -m lab9.final_review` từ `src/` để sinh lại CSV, trace và ledger; có đối chứng `fixed` cho từng claim. Key nội bộ của giảng viên không có trong repo.

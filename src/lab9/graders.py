@@ -83,18 +83,22 @@ class ReplyAmountMatchesLedger(Evaluator[Any, Trial]):
         for event in ctx.output.get("events", []):
             if event.get("kind") == "reply":
                 text = str((event.get("payload") or {}).get("text", ""))
-                # Accept Vietnamese amount formats such as "35.000đ", "35,000 VND",
-                # and ungrouped amounts, while ignoring unrelated IDs.
-                pattern = r"(?<!\w)(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:đồng|đ|VND)(?!\w)"
-                for clause in re.split(r"[;\n]|(?<=[.!?])\s+", text):
-                    tokens = re.findall(pattern, clause, flags=re.IGNORECASE)
-                    # Quotes and approval limits may differ from the committed refund.
-                    # Only exempt clearly marked proposals without a completion claim.
-                    proposal_only = re.search(r"đề xuất|dự kiến|hạn mức|propos|quote", clause, re.I)
-                    completed = re.search(r"đã\s+(?:được\s+)?hoàn|đã\s+refund|refunded|committed", clause, re.I)
-                    if proposal_only and not completed:
+                # Classify each amount from its own preceding context. Splitting on
+                # commas corrupts 35,000 VND; treating the whole sentence as one
+                # claim confuses the quote with the amount actually committed.
+                pattern = r"(?<![\w.,])(-?(?:\d{1,3}(?:[., \u00a0\u202f]\d{3})+|\d+))\s*(?:đồng|đ|VND)(?!\w)"
+                cues = re.compile(
+                    r"(?P<proposal>đề xuất|dự kiến|hạn mức|propos\w*|quot\w*)"
+                    r"|(?P<committed>đã\s+(?:được\s+)?hoàn|đã\s+refund|hoàn\s+tiền\s+thành\s+công|refunded|committed)", re.I)
+                previous_end = 0
+                for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+                    context = text[previous_end:match.start()]
+                    context = re.split(r"[;\n.!?]", context)[-1]
+                    markers = list(cues.finditer(context))
+                    previous_end = match.end()
+                    if markers and markers[-1].lastgroup == "proposal":
                         continue
-                    amounts.extend(int(x.replace(".", "").replace(",", "")) for x in tokens)
+                    amounts.append(int(re.sub(r"[.,\s\u00a0\u202f]", "", match.group(1))))
         ledger = int(ctx.output.get("snapshot", {}).get("refund_vnd", 0))
         ok = all(amount == ledger for amount in amounts)
         return EvaluationReason(value=ok, reason=None if ok else f"reply amount {amounts} != ledger {ledger}")
