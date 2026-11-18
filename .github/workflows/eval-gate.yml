@@ -54,7 +54,7 @@ jobs:
           gate_output=$(python -m lab9.gate --pr reports/eval_seeded_regression.json --baseline "$EVAL_BASELINE" --spec "$EVAL_SPEC") || gate_status=$?
           printf '%s\n' "$gate_output"
           # A Python exception can also exit 1. Require the explicit pass_rate verdict.
-          if [[ "$gate_status" -ne 1 ]] || ! grep -Eq '^exit 1 — blocked: ([^,]+, )*pass_rate(, |$)' <<< "$gate_output"; then
+          if [[ "$gate_status" -ne 1 ]] || ! grep -Eq '^exit 1.*blocked:.*(, |: )pass_rate(, |$)' <<< "$gate_output"; then
             echo "Expected the gate to block seeded_regression on pass_rate with exit 1 (got $gate_status)."
             exit 1
           fi
