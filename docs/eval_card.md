@@ -57,4 +57,6 @@
 
 Với điều kiện lỗi xuất hiện khi `seed % 3 == 0` (khoảng 1/3 seed), bộ năm seed cố định có thể chỉ thấy một lần hoặc không thấy; không suy ra phát hiện ổn định trên LLM thật từ một lần replay. `pass_hat_5` nhạy với lỗi trong nhóm seed đã chạy, nhưng không chứng minh absence của lỗi hiếm. Cần tăng cỡ mẫu và dùng held-out incidents.
 
+Output đầy đủ cũng được đính vào mô tả [PR #2](https://github.com/Quoosc/K5-L3B-DAY09-PhamTranQuoc-2A202604113-EvaluationandFailureAnalysis/pull/2); tab Checks của PR là nguồn trạng thái CI của bản cải thiện. Hai gate phải xanh trước merge.
+
 LMS và hạn nộp theo ca: xem [trạng thái nộp bài](submission_status.md). Không dùng CI xanh để thay cho xác nhận đã nộp LMS hoặc kết quả chấm ẩn.

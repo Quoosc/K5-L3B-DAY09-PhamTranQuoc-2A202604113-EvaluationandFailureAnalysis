@@ -6,7 +6,7 @@ Người thực hiện: **Phạm Trấn Quốc**, MSSV **2A202604113**, lớp **
 |---|---|
 | Repo cá nhân | https://github.com/Quoosc/K5-L3B-DAY09-PhamTranQuoc-2A202604113-EvaluationandFailureAnalysis |
 | PR trong fork | PR #1: `starter/d09` → `main`, đã merge commit `90f81b5` sau hai CI gate xanh |
-| Cải thiện sau review | Nhánh `improve/final-submission`; tiếp tục qua PR vào `main`, chỉ merge sau hai CI gate xanh |
+| Cải thiện sau review | [PR #2](https://github.com/Quoosc/K5-L3B-DAY09-PhamTranQuoc-2A202604113-EvaluationandFailureAnalysis/pull/2): `improve/final-submission` → `main`; điều kiện merge là hai CI gate xanh. Trạng thái và thời điểm merge chính xác nằm trong PR |
 | Báo cáo và nhãn | Có trong repo; report sinh bằng script, không sửa tay; labels tách khỏi eval items |
 | Bằng chứng chuẩn bị PR | `src/reports/submission_evidence.md`: output gate regression, scorecard, A/A và bốn trap exit 1 |
 | Anchor | `docs/coding_sheet.md` và `src/reports/coding_sheet.csv`: bước sai đầu tiên của tám case; key chính thức không có trong repo |
